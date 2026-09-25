@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}{{ t('register.title') }} | SaúdeApp{% endblock %}
+{% block content %}
+<div class="register-page">
+  <section class="register-intro">
+    <div class="register-brand"><span class="register-brand-mark">+</span><strong>SaúdeApp</strong></div>
+    <div class="register-intro-content">
+      <span class="register-kicker">{{ t('register.kicker') }}</span>
+      <h1>{{ t('register.hero_title') }}</h1>
+      <p>{{ t('register.hero_text') }}</p>
+      <div class="register-points">
+        <div><b>01</b><span>{{ t('register.point1') }}</span></div>
+        <div><b>02</b><span>{{ t('register.point2') }}</span></div>
+        <div><b>03</b><span>{{ t('register.point3') }}</span></div>
+      </div>
+    </div>
+    <div class="register-intro-footer">{{ t('register.academic') }}</div>
+  </section>
+
+  <section class="register-form-side">
+    <a class="register-home-link" href="{{ url_for('auth.index') }}" aria-label="{{ t('auth.home') }}">← <span>{{ t('auth.home') }}</span></a>
+    <div class="register-form-head"><div><span class="eyebrow">{{ t('register.step') }}</span><h2>{{ t('register.title') }}</h2><p>{{ t('register.form_subtitle') }}</p></div><div class="register-progress"><span></span></div></div>
+    <form method="POST" class="register-form">
+      <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+      <div class="register-section"><span class="register-section-number">1</span><div><strong>{{ t('register.account_section') }}</strong><small>{{ t('register.account_hint') }}</small></div></div>
+      <div class="register-fields">
+        <div class="register-field register-field-full"><label for="nome">{{ t('register.fullname') }}</label><input id="nome" type="text" name="nome" autocomplete="name" placeholder="{{ t('register.name_example') }}" required></div>
+        <div class="register-field"><label for="login">{{ t('login.label') }}</label><input id="login" type="text" name="login" autocomplete="username" placeholder="{{ t('login.login_placeholder') }}" required></div>
+        <div class="register-field"><label for="senha">{{ t('login.password') }}</label><input id="senha" type="password" name="senha" autocomplete="new-password" placeholder="{{ t('register.password_hint') }}" minlength="8" required></div>
+      </div>
+
+      <div class="register-section"><span class="register-section-number">2</span><div><strong>{{ t('register.health_section') }}</strong><small>{{ t('register.health_hint') }}</small></div></div>
+      <div class="register-fields">
+        <div class="register-field"><label for="idade">{{ t('register.age') }}</label><input id="idade" type="number" name="idade" min="0" max="120" placeholder="16" required></div>
+        <div class="register-field"><label for="tipo_sanguineo">{{ t('register.blood') }}</label><select id="tipo_sanguineo" name="tipo_sanguineo"><option value="">—</option>{% for tipo in ["A+","A-","B+","B-","AB+","AB-","O+","O-"] %}<option value="{{ tipo }}">{{ tipo }}</option>{% endfor %}</select></div>
+        <div class="register-field"><label for="altura">{{ t('register.height') }}</label><div class="unit-input"><input id="altura" type="number" name="altura" step="0.01" min="0.5" max="2.5" placeholder="1.70" required><span>m</span></div></div>
+        <div class="register-field"><label for="peso">{{ t('register.weight') }}</label><div class="unit-input"><input id="peso" type="number" name="peso" step="0.1" min="1" max="500" placeholder="65.0" required><span>kg</span></div></div>
+        <div class="register-field register-field-full"><label for="meta_agua">{{ t('register.water') }}</label><div class="unit-input"><input id="meta_agua" type="number" name="meta_agua" step="0.1" value="2.0" min="0.5" max="10"><span>{{ t('register.water_unit') }}</span></div></div>
+      </div>
+
+      <div class="register-consent"><span>✓</span><p>{{ t('register.data_note') }}</p></div>
+      <button type="submit" class="register-submit"><span>{{ t('register.create') }}</span><b>→</b></button>
+    </form>
+    <p class="register-login">{{ t('register.have') }} <a href="{{ url_for('auth.login') }}">{{ t('register.enter') }}</a></p>
+  </section>
+</div>
+{% endblock %}

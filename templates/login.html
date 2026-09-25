@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}{{ t('login.enter') }} | SaúdeApp{% endblock %}
+{% block content %}
+<div class="auth-page">
+  <div class="auth-layout">
+    <aside class="auth-brand-panel">
+      <div class="auth-brand"><span class="auth-brand-mark">+</span><strong>SaúdeApp</strong></div>
+      <div class="auth-brand-copy">
+        <span class="auth-kicker">{{ t('login.security') }}</span>
+        <h1>{{ t('login.welcome') }}</h1>
+        <p>{{ t('login.subtitle') }}</p>
+        <div class="auth-points">
+          <div><b>01</b><span>{{ t('register.point1') }}</span></div>
+          <div><b>02</b><span>{{ t('register.point2') }}</span></div>
+          <div><b>03</b><span>{{ t('register.point3') }}</span></div>
+        </div>
+      </div>
+      <small class="auth-foot">{{ t('login.security') }}</small>
+    </aside>
+
+    <section class="auth-form-panel">
+      <div class="auth-form-wrap">
+        <a class="auth-home-link" href="{{ url_for('auth.index') }}" aria-label="{{ t('auth.home') }}">← <span>{{ t('auth.home') }}</span></a>
+        <div class="auth-mobile-brand"><span class="auth-brand-mark">+</span><strong>SaúdeApp</strong></div>
+        <div class="auth-heading">
+          <div><span class="auth-step">01 / {{ t('login.enter') }}</span><h2>{{ t('login.welcome') }}</h2><p>{{ t('login.subtitle') }}</p></div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}<div class="login-messages">{% for category, message in messages %}<div class="login-alert login-alert-{{ category }}" role="alert">{{ message }}</div>{% endfor %}</div>{% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('auth.login') }}" class="auth-form" id="loginForm">
+          <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+          <div class="auth-field">
+            <label for="login">{{ t('login.label') }}</label>
+            <input type="text" id="login" name="login" placeholder="{{ t('login.login_placeholder') }}" autocomplete="username" required autofocus>
+          </div>
+          <div class="auth-field">
+            <div class="auth-label-row"><label for="senha">{{ t('login.password') }}</label><a href="#" onclick="return false;" title="{{ t('login.future') }}">{{ t('login.forgot') }}</a></div>
+            <div class="auth-password"><input type="password" id="senha" name="senha" placeholder="{{ t('login.password_placeholder') }}" autocomplete="current-password" required><button type="button" id="togglePassword" aria-label="{{ t('login.show') }}" title="{{ t('login.show') }}">◉</button></div>
+          </div>
+          <label class="auth-remember"><input type="checkbox" name="lembrar" id="lembrar"><span>{{ t('login.remember') }}</span></label>
+          <button type="submit" class="auth-submit"><span>{{ t('login.enter') }}</span><b>→</b></button>
+        </form>
+
+        <div class="auth-switch"><span>{{ t('login.no_account') }}</span> <a href="{{ url_for('auth.cadastro') }}">{{ t('login.create') }}</a></div>
+        <div class="auth-safe">{{ t('login.security') }}</div>
+      </div>
+    </section>
+  </div>
+</div>
+<script>
+(function(){const b=document.getElementById('togglePassword'),i=document.getElementById('senha');if(b&&i)b.addEventListener('click',()=>{i.type=i.type==='password'?'text':'password';});})();
+</script>
+{% endblock %}

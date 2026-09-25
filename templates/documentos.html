@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}{{ t('docs.title') }}{% endblock %}
+{% block content %}
+<h2 class="page-title">📄 {{ t('docs.title') }}</h2>
+<div class="section-card hero-doc">
+  <div><span class="eyebrow">{{ t('docs.academic') }}</span><h3>{{ t('docs.subtitle') }}</h3><p>{{ t('docs.description') }}</p></div>
+  <div style="display:flex;gap:.5rem;flex-wrap:wrap"><a class="btn btn-primary" href="{{ url_for('documentos.resumo') }}" target="_blank">📋 {{ t('docs.summary') }}</a><a class="btn btn-outline" href="{{ url_for('documentos.carteirinha') }}" target="_blank">🪪 {{ t('docs.card') }}</a></div>
+</div>
+<div class="doc-grid">
+  <div class="section-card"><h3>💊 {{ t('docs.prescriptions') }}</h3>{% for r in usuario.receitas[:6] %}<div class="doc-row"><div><b>{{ t('docs.prescription_for') }} {{ r.medico }}</b><small>{{ r.data }} • {{ r.medicamentos|length }} {{ t('docs.medication_count') }}</small></div><a class="btn btn-outline btn-sm" target="_blank" href="{{ url_for('documentos.receita', receita_id=r.id) }}">PDF</a></div>{% else %}<p class="empty-state">{{ t('docs.available') }}</p>{% endfor %}</div>
+  <div class="section-card"><h3>🧪 {{ t('docs.exams') }}</h3>{% for e in usuario.exames[:6] %}<div class="doc-row"><div><b>{{ e.tipo }}</b><small>{{ e.data }}</small></div><a class="btn btn-outline btn-sm" target="_blank" href="{{ url_for('documentos.exame', exame_id=e.id) }}">PDF</a></div>{% else %}<p class="empty-state">{{ t('docs.available') }}</p>{% endfor %}</div>
+  <div class="section-card"><h3>📅 {{ t('docs.appointments') }}</h3>{% for a in usuario.agendamentos[:6] %}<div class="doc-row"><div><b>{{ a.especialidade }}</b><small>{{ a.data_consulta }} {{ t('docs.appointment_at') }} {{ a.hora }} • {{ a.medico }}</small></div><a class="btn btn-outline btn-sm" target="_blank" href="{{ url_for('documentos.agendamento', agendamento_id=a.id) }}">PDF</a></div>{% else %}<p class="empty-state">{{ t('docs.available') }}</p>{% endfor %}</div>
+</div>
+{% endblock %}

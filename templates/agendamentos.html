@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% block title %}{{ t('appointments.title') }}{% endblock %}
+{% block content %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const data = document.querySelector('input[name="data_consulta"]');
+  const hora = document.querySelector('input[name="hora"]');
+  if (data) data.min = "{{ data_hoje }}";
+  function validarFuturo() {
+    if (!data || !hora || !data.value || !hora.value) return;
+    const alvo = new Date(`${data.value}T${hora.value}`);
+    if (alvo <= new Date()) {
+      hora.setCustomValidity("{{ t('appointments.future') }}");
+    } else {
+      hora.setCustomValidity("");
+    }
+  }
+  data?.addEventListener("change", validarFuturo);
+  hora?.addEventListener("change", validarFuturo);
+});
+</script>
+
+<h2 class="page-title">📅 {{ t('appointments.title') }}</h2>
+
+<div class="section-card">
+  <h3 >{{ t('appointments.new') }}</h3>
+  <form method="POST" action="{{ url_for('agendamentos.criar') }}">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <div class="form-grid">
+      <div>
+        <label >{{ t('common.doctor') }}</label>
+        <input type="text" name="medico" required />
+      </div>
+      <div>
+        <label>{{ t('common.crm') }}</label>
+        <input type="text" name="crm" />
+      </div>
+      <div>
+        <label >{{ t('common.specialty') }}</label>
+        <input type="text" name="especialidade" required />
+      </div>
+      <div>
+        <label >{{ t('common.date') }}</label>
+        <input type="date" name="data_consulta" min="{{ data_hoje }}" min="{{ data_hoje }}" required />
+      </div>
+      <div>
+        <label >{{ t('common.time') }}</label>
+        <input type="time" name="hora" required />
+      </div>
+      <div>
+        <label >{{ t('common.location') }}</label>
+        <input type="text" name="local" placeholder="{{ t('appointments.location_example') }}" />
+      </div>
+    </div>
+    <label >{{ t('common.notes') }}</label>
+    <textarea name="observacoes" rows="2"></textarea>
+    <button type="submit" class="btn btn-primary" >{{ t('appointments.schedule') }}</button>
+  </form>
+</div>
+
+<div class="section-card">
+  <h3 >{{ t('appointments.upcoming') }}</h3>
+  {% if futuros %}
+  <table class="tabela">
+    <thead>
+      <tr><th>{{ t('common.date') }}</th><th>{{ t('common.time') }}</th><th>{{ t('common.doctor') }}</th><th>{{ t('common.specialty') }}</th><th>{{ t('common.location') }}</th><th></th></tr>
+    </thead>
+    <tbody>
+    {% for a in futuros %}
+      <tr>
+        <td>{{ a.data_consulta }}</td>
+        <td>{{ a.hora }}</td>
+        <td>{{ t('appointments.doctor_prefix') }} {{ a.medico }}</td>
+        <td>{{ a.especialidade }}</td>
+        <td>{{ a.local or '—' }}</td>
+        <td class="actions-cell"><a class="btn btn-outline btn-sm" target="_blank" href="{{ url_for('documentos.agendamento', agendamento_id=a.id) }}">PDF</a>
+          <button type="button" class="btn btn-primary btn-sm"
+                  onclick="document.getElementById('modal-{{ a.id }}').style.display='flex'">
+            ✓ {{ t('appointments.completed') }}
+          </button>
+          <form method="POST" action="{{ url_for('agendamentos.cancelar', agendamento_id=a.id) }}" onsubmit="return confirm('{{ t('appointments.cancel_confirm') }}')">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}"><button class="btn btn-danger btn-sm">✕</button></form>
+        </td>
+      </tr>
+
+      <div class="modal" id="modal-{{ a.id }}">
+        <div class="modal-box">
+          <h4>{{ t('appointments.complete_title') }} — {{ a.especialidade }}</h4>
+          <p class="modal-sub">{{ t('appointments.complete_note') }}</p>
+          <form method="POST" action="{{ url_for('agendamentos.concluir', agendamento_id=a.id) }}">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+            <label >{{ t('common.diagnosis') }}</label>
+            <input type="text" name="diagnostico" placeholder="{{ t('appointments.diagnosis_example') }}" />
+            <label >{{ t('common.notes') }}</label>
+            <textarea name="observacoes" rows="2"></textarea>
+            <div style="margin-top:0.75rem; display:flex; gap:0.5rem">
+              <button type="submit" class="btn btn-primary" >{{ t('common.confirm') }}</button>
+              <button type="button" class="btn btn-outline"
+                      onclick="document.getElementById('modal-{{ a.id }}').style.display='none'" >{{ t('common.cancel') }}</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty-state" >{{ t('appointments.empty') }}</p>
+  {% endif %}
+</div>
+
+{% if passados %}
+<div class="section-card">
+  <h3 >{{ t('appointments.history') }}</h3>
+  <table class="tabela tabela-sm">
+    <thead><tr><th>{{ t('common.date') }}</th><th>{{ t('common.doctor') }}</th><th>{{ t('common.specialty') }}</th><th>{{ t('common.status') }}</th></tr></thead>
+    <tbody>
+    {% for a in passados %}
+      <tr>
+        <td>{{ a.data_consulta }}</td>
+        <td>{{ a.medico }}</td>
+        <td>{{ a.especialidade }}</td>
+        <td>
+          {% if a.status == 'realizado' %}<span class="badge badge-success">{{ t('appointments.completed') }}</span>
+          {% else %}<span class="badge badge-danger" >{{ t('common.cancelled') }}</span>{% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<style>
+.modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4);
+  align-items:center; justify-content:center; z-index:200; }
+.modal-box { background:#fff; border-radius:10px; padding:1.5rem; width:90%; max-width:420px; }
+.modal-sub { font-size:.85rem; color:var(--cinza); margin-bottom:.75rem; }
+.actions-cell { display:flex; gap:.4rem; }
+</style>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const data = document.querySelector('input[name="data_consulta"]');
+  const hora = document.querySelector('input[name="hora"]');
+  if (data) data.min = "{{ data_hoje }}";
+  function validarFuturo() {
+    if (!data || !hora || !data.value || !hora.value) return;
+    const alvo = new Date(`${data.value}T${hora.value}`);
+    if (alvo <= new Date()) {
+      hora.setCustomValidity("{{ t('appointments.future') }}");
+    } else {
+      hora.setCustomValidity("");
+    }
+  }
+  data?.addEventListener("change", validarFuturo);
+  hora?.addEventListener("change", validarFuturo);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}{{ t('exams.title') }}{% endblock %}
+{% block content %}
+<h2 class="page-title">🧪 {{ t('exams.title') }}</h2>
+
+<div class="section-card">
+  <h3 >{{ t('exams.register') }}</h3>
+  <form method="POST" action="{{ url_for('exames.adicionar') }}" enctype="multipart/form-data">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <div class="form-grid">
+      <div>
+        <label >{{ t('exams.type') }}</label>
+        <input type="text" name="tipo" placeholder="{{ t('exams.type_example') }}" required />
+      </div>
+      <div>
+        <label >{{ t('exams.file') }}</label>
+        <input type="file" name="arquivo" accept=".pdf,.png,.jpg,.jpeg" />
+      </div>
+      <div style="grid-column: 1 / -1">
+        <label >{{ t('exams.result') }}</label>
+        <input type="text" name="resultado" placeholder="{{ t('exams.result_example') }}" />
+      </div>
+    </div>
+    <label >{{ t('common.notes') }}</label>
+    <textarea name="observacoes" rows="2"></textarea>
+    <button type="submit" class="btn btn-primary" >{{ t('exams.save') }}</button>
+  </form>
+</div>
+
+{% if usuario.exames %}
+<div class="section-card">
+  <h3 >{{ t('common.history') }}</h3>
+  <table class="tabela">
+    <thead>
+      <tr><th>{{ t('exams.date') }}</th><th>{{ t('exams.type') }}</th><th>{{ t('exams.result_header') }}</th><th>{{ t('exams.file_header') }}</th><th>{{ t('exams.notes_header') }}</th><th></th></tr>
+    </thead>
+    <tbody>
+    {% for e in usuario.exames | reverse %}
+      <tr>
+        <td>{{ e.data }}</td>
+        <td>{{ e.tipo }}</td>
+        <td>{{ e.resultado or '—' }}</td>
+        <td>
+          {% if e.arquivo %}
+            <a href="{{ url_for('exames.ver_arquivo', nome=e.arquivo) }}"
+               target="_blank" class="btn btn-outline btn-sm" >📎 {{ t('exams.view') }}</a>
+          {% else %}—{% endif %}
+        </td>
+        <td>{{ e.observacoes or '—' }}</td>
+        <td><a class="btn btn-outline btn-sm" target="_blank" href="{{ url_for('documentos.exame', exame_id=e.id) }}">PDF</a></td>
+        <td>
+          <form method="POST" action="{{ url_for('exames.remover', exame_id=e.id) }}" onsubmit="return confirm({{ t('exams.remove_confirm')|tojson }})">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}"><button class="btn btn-danger btn-sm">✕</button></form>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p class="empty-state" >{{ t('exams.empty') }}</p>
+{% endif %}
+{% endblock %}

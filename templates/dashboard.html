@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}{{ t('nav.dashboard') }} | SaúdeApp{% endblock %}
+{% block topbar %}{{ t('nav.dashboard') }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><span class="eyebrow">{{ t('dash.overview') }}</span><h1>{{ t('dash.hello') }} {{ usuario.nome or usuario.login }}</h1><p>{{ t('dash.summary') }} {{ data_hoje_br }}.</p></div>
+  <a href="{{ url_for('ia.pagina') }}" class="btn btn-primary">{{ t('dash.open_assistant') }}</a>
+</div>
+
+{% if alertas %}<section class="notice-stack">{% for alerta in alertas %}<div class="notice notice-{{ alerta.tipo }}"><span class="notice-dot"></span><span>{% if alerta.chave == 'dash.pressure_alert' %}⚠️ {{ t(alerta.chave) }}: {{ alerta.valor }}{% elif alerta.chave == 'dash.glucose_alert' %}🩸 {{ t(alerta.chave) }}: {{ alerta.valor }}{% elif alerta.chave == 'dash.hydration_alert' %}💧 {{ t(alerta.chave) | replace('25.0', alerta.valor|string) }}{% elif alerta.chave == 'dash.bmi_alert' %}⚖️ {{ t(alerta.chave).replace('{value}', alerta.valor|string) }}{% else %}{{ alerta.mensagem }}{% endif %}</span></div>{% endfor %}</section>{% endif %}
+
+<section class="game-strip">
+  <div class="game-level"><span class="eyebrow">{{ t('game.level') }}</span><strong>{{ gamificacao_atual.level }}</strong><small>{{ gamificacao_atual.xp }} XP</small></div>
+  <div class="game-progress-wrap"><div class="game-progress-head"><span>{{ t('game.next_level') }}</span><b>{{ gamificacao_atual.next_level_xp - gamificacao_atual.xp }} XP</b></div><div class="progress game-progress"><span style="width:{{ gamificacao_atual.progress }}%"></span></div></div>
+  <div class="game-streak"><span class="streak-icon">7</span><div><strong>{{ gamificacao_atual.streak }} {{ t('game.days') }}</strong><small>{{ t('game.streak') }}</small></div></div>
+  <a href="{{ url_for('gamificacao.pagina') }}" class="btn btn-secondary">{{ t('game.open') }}</a>
+</section>
+
+<section class="metric-grid">
+  <article class="metric-card"><span class="metric-label">{{ t('dash.bmi') }}</span><strong>{{ usuario.calcular_imc() }}</strong><small>{% set classificacao_imc = usuario.classificar_imc() %}{% set imc_traducoes = {'Abaixo do peso': 'dash.underweight', 'Peso normal': 'dash.normal_weight', 'Sobrepeso': 'dash.overweight', 'Obesidade grau I': 'dash.obesity_1', 'Obesidade grau II': 'dash.obesity_2', 'Obesidade grau III': 'dash.obesity_3', 'Sem dados': 'dash.no_records'} %}{{ t(imc_traducoes.get(classificacao_imc, 'dash.no_records')) }}</small></article>
+  <article class="metric-card"><span class="metric-label">{{ t('dash.weight') }}</span><strong>{{ usuario.peso }} <em>kg</em></strong><small>{% if analytics.peso.n > 1 %}{% if analytics.peso.direcao == 'down' %}↓{% elif analytics.peso.direcao == 'up' %}↑{% else %}→{% endif %} {{ analytics.peso.variacao|abs }} kg {{ t('dash.days30') }}{% else %}{{ t('dash.no_trend') }}{% endif %}</small></article>
+  {% set p = usuario.ultima_pressao() %}<article class="metric-card"><span class="metric-label">{{ t('dash.last_pressure') }}</span><strong>{{ p.sistolica ~ '/' ~ p.diastolica if p else '—' }}</strong><small>{% if media_pressao %}{{ t('dash.avg30') }} {{ media_pressao.sistolica }}/{{ media_pressao.diastolica }}{% else %}{{ t('dash.no_average') }}{% endif %}</small></article>
+  {% set g = usuario.ultima_glicemia() %}<article class="metric-card"><span class="metric-label">{{ t('dash.last_glucose') }}</span><strong>{{ g.valor if g else '—' }}{% if g %}<em> mg/dL</em>{% endif %}</strong><small>{{ g.data if g else t('dash.no_records') }}</small></article>
+</section>
+
+<div class="dashboard-grid">
+  <section class="panel hydration-panel">
+    <div class="panel-head"><div><span class="eyebrow">{{ t('dash.today_label') }}</span><h2>{{ t('dash.hydration') }}</h2></div><strong>{{ usuario.progresso_agua() }}%</strong></div>
+    <div class="progress"><span style="width:{{ [usuario.progresso_agua(),100]|min }}%"></span></div>
+    <div class="split-line"><span>{{ usuario.agua_consumida }} L {{ t('dash.consumed') }}</span><span>{{ t('dash.goal') }} {{ usuario.meta_agua }} L</span></div>
+    <form method="POST" action="{{ url_for('dashboard.adicionar_agua') }}" class="quick-form"><input type="hidden" name="_csrf" value="{{ csrf_token() }}"><select name="quantidade"><option value="0.2">200 ml</option><option value="0.3">300 ml</option><option value="0.5" selected>500 ml</option><option value="1">1 L</option></select><button class="btn btn-primary">{{ t('dash.add') }}</button></form>
+    <div class="water-week"><h3>{{ t('dash.last7') }}</h3>{% for d in agua_semana %}<div class="water-row"><span>{{ d.data[8:10] }}/{{ d.data[5:7] }}</span><div class="mini-progress"><i style="width:{{ [((d.litros / d.meta) * 100) if d.meta else 0,100]|min }}%"></i></div><b>{{ d.litros }} L</b></div>{% endfor %}</div>
+  </section>
+  <section class="panel"><div class="panel-head"><div><span class="eyebrow">{{ t('dash.evolution') }}</span><h2>{{ t('dash.weight_chart') }}</h2></div><span class="panel-muted">{{ usuario.historico_peso|length }} {{ t('dash.records_count') }}</span></div><div class="chart-box"><canvas id="grafPeso"></canvas></div></section>
+</div>
+
+<section class="quick-section"><div class="section-heading"><div><span class="eyebrow">{{ t('dash.quick_record') }}</span><h2>{{ t('dash.update_tracking') }}</h2></div></div><div class="quick-cards">
+  <form method="POST" action="{{ url_for('dashboard.registrar_peso') }}" class="quick-card"><input type="hidden" name="_csrf" value="{{ csrf_token() }}"><label>{{ t('dash.weight_kg') }}</label><div class="field-inline"><input type="number" name="valor" step="0.1" min="1" max="500" placeholder="72,5" required><span>kg</span></div><button class="btn btn-secondary">{{ t('dash.save_record') }}</button></form>
+  <form method="POST" action="{{ url_for('dashboard.registrar_pressao') }}" class="quick-card"><input type="hidden" name="_csrf" value="{{ csrf_token() }}"><label>{{ t('dash.pressure_arterial') }}</label><div class="field-inline"><input type="number" name="sistolica" min="50" max="300" placeholder="120" required><span>/</span><input type="number" name="diastolica" min="30" max="200" placeholder="80" required><span>mmHg</span></div><button class="btn btn-secondary">{{ t('dash.save_record') }}</button></form>
+  <form method="POST" action="{{ url_for('dashboard.registrar_glicemia') }}" class="quick-card"><input type="hidden" name="_csrf" value="{{ csrf_token() }}"><label>{{ t('dash.glucose_mg') }}</label><div class="field-inline"><input type="number" name="valor" step="0.1" min="20" max="1000" placeholder="100" required><span>mg/dL</span></div><button class="btn btn-secondary">{{ t('dash.save_record') }}</button></form>
+</div></section>
+
+<div class="dashboard-grid charts-secondary"><section class="panel"><div class="panel-head"><div><span class="eyebrow">{{ t('dash.pressure') }}</span><h2>{{ t('dash.pressure_chart') }}</h2></div></div><div class="chart-box"><canvas id="grafPressao"></canvas></div></section><section class="panel"><div class="panel-head"><div><span class="eyebrow">{{ t('dash.glucose') }}</span><h2>{{ t('dash.glucose_chart') }}</h2></div></div><div class="chart-box"><canvas id="grafGlicemia"></canvas></div></section></div>
+<script>
+const dadosPeso={{ graf_peso|safe }}, dadosPressao={{ graf_pressao|safe }}, dadosGlic={{ graf_glicemia|safe }};
+const styles=getComputedStyle(document.documentElement), text=styles.getPropertyValue('--muted').trim(), line=styles.getPropertyValue('--accent').trim();
+const base={responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:text,usePointStyle:true}}},scales:{x:{grid:{display:false},ticks:{color:text}},y:{grid:{color:styles.getPropertyValue('--line').trim()},ticks:{color:text}}}};
+function chart(id,type,labels,datasets,legend=false){if(!labels.length)return;new Chart(document.getElementById(id),{type,data:{labels,datasets},options:{...base,plugins:{legend:{display:legend,labels:{color:text,usePointStyle:true}}}}})}
+chart('grafPeso','line',dadosPeso.labels,[{label:'{{ t("dash.weight_kg") }}',data:dadosPeso.dados,borderColor:line,backgroundColor:'transparent',tension:.28,borderWidth:2,pointRadius:2}],false);
+chart('grafPressao','line',dadosPressao.labels,[{label:'{{ t("dash.systolic") }}',data:dadosPressao.dados_sis,borderColor:'#d64545',tension:.28,borderWidth:2,pointRadius:2},{label:'{{ t("dash.diastolic") }}',data:dadosPressao.dados_dia,borderColor:'#d78b2a',tension:.28,borderWidth:2,pointRadius:2}],true);
+chart('grafGlicemia','line',dadosGlic.labels,[{label:'{{ t("dash.glucose_mg") }}',data:dadosGlic.dados,borderColor:'#7457b8',tension:.28,borderWidth:2,pointRadius:2}],false);
+</script>
+{% endblock %}

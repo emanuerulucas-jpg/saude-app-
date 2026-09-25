@@ -1,0 +1,9 @@
+Flask>=3.1,<4
+Werkzeug>=3.1,<4
+reportlab>=4.2,<5
+qrcode[pil]>=8,<9
+Pillow>=10,<12
+
+openai>=1.0,<2
+tzdata>=2026.1
+

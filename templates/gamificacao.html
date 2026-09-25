@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}{{ t('game.title') }} | SaúdeApp{% endblock %}
+{% block topbar %}{{ t('game.title') }}{% endblock %}
+{% block content %}
+<div class="game-page-head">
+  <div><span class="eyebrow">{{ t('game.eyebrow') }}</span><h1>{{ t('game.title') }}</h1><p>{{ t('game.subtitle') }}</p></div>
+  <div class="game-head-chip"><span>XP</span><strong>{{ game.xp }}</strong></div>
+</div>
+
+<section class="player-card">
+  <div class="player-avatar">{% if usuario.foto_perfil %}<img src="{{ url_for('perfil.foto_perfil') }}" alt="">{% else %}{{ (usuario.nome or usuario.login)[:1]|upper }}{% endif %}</div>
+  <div class="player-main">
+    <div class="player-name-row"><div><span class="eyebrow">{{ t('game.level') }} {{ game.level }}</span><h2>{{ usuario.nome or usuario.login }}</h2><p>{{ t('game.rank.' ~ game.rank.level ~ '.title') }} · {{ t('game.rank.' ~ game.rank.level ~ '.description') }}</p></div><strong>{{ game.progress|round(0)|int }}%</strong></div>
+    <div class="game-xp-bar"><span style="width:{{ game.progress }}%"></span></div>
+    <div class="game-xp-meta"><span>{{ game.xp - game.current_level_xp }} XP {{ t('game.this_level') }}</span><span>{{ game.next_level_xp - game.current_level_xp }} XP {{ t('game.level_total') }}</span></div>
+  </div>
+  <div class="player-streak"><div class="flame">✦</div><strong>{{ game.streak }}</strong><span>{{ t('game.current_streak') }}</span><small>{{ t('game.best') }}: {{ game.best_streak }}</small></div>
+</section>
+
+<div class="game-overview-grid">
+  <div class="game-mini-stat"><span>{{ t('game.actions') }}</span><strong>{{ game.total_events }}</strong><small>{{ t('game.actions_desc') }}</small></div>
+  <div class="game-mini-stat"><span>{{ t('game.water_days') }}</span><strong>{{ game.water_goal_days }}</strong><small>{{ t('game.water_desc') }}</small></div>
+  <div class="game-mini-stat"><span>{{ t('game.badges') }}</span><strong>{{ game.achievements|length }}</strong><small>{{ t('game.badges_desc') }}</small></div>
+  <div class="game-mini-stat"><span>{{ t('game.rewards') }}</span><strong>{{ game.rewards_unlocked }}/{{ game.rewards_total }}</strong><small>{{ t('game.rewards_desc') }}</small></div>
+</div>
+
+<div class="game-main-grid">
+  <section class="panel game-mission-panel">
+    <div class="panel-head"><div><span class="eyebrow">{{ t('game.daily') }}</span><h2>{{ t('game.missions') }}</h2></div><span class="panel-muted">{{ t('game.refreshes') }}</span></div>
+    <div class="mission-list">{% for m in game.missions %}<article class="mission {% if m.progress >= m.target %}mission-done{% endif %}"><div class="mission-mark">{% if m.progress >= m.target %}✓{% else %}{{ loop.index }}{% endif %}</div><div class="mission-main"><div><strong>{{ t('game.mission.' ~ m.id ~ '.title') }}</strong><small>{{ t('game.mission.' ~ m.id ~ '.description') }}</small></div><span>{{ m.progress }}/{{ m.target }}</span><div class="progress"><i style="width:{{ (m.progress / m.target * 100)|int }}%"></i></div></div></article>{% endfor %}</div>
+  </section>
+  <section class="panel weekly-panel">
+    <div class="panel-head"><div><span class="eyebrow">{{ t('game.weekly') }}</span><h2>{{ t('game.weekly_title') }}</h2></div><span class="weekly-bonus">+100 XP</span></div>
+    <div class="weekly-list">{% for m in game.weekly_missions %}<article class="weekly-mission {% if m.progress >= m.target %}mission-done{% endif %}"><div class="weekly-top"><strong>{{ t('game.weekly_mission.' ~ m.id ~ '.title') }}</strong><span>{{ m.progress }}/{{ m.target }}</span></div><small>{{ t('game.weekly_mission.' ~ m.id ~ '.description') }}</small><div class="progress"><i style="width:{{ (m.progress / m.target * 100)|int }}%"></i></div><em>+{{ m.xp }} XP</em></article>{% endfor %}</div>
+    <div class="weekly-note">{{ t('game.weekly_note') }}</div>
+  </section>
+</div>
+
+<section class="panel skill-panel">
+  <div class="panel-head"><div><span class="eyebrow">{{ t('game.tree_eyebrow') }}</span><h2>{{ t('game.tree_title') }}</h2></div><span class="panel-muted">{{ t('game.tree_subtitle') }}</span></div>
+  <div class="skill-tree">{% for n in game.skill_tree %}<div class="skill-node {% if n.percent >= 100 %}skill-complete{% endif %}"><div class="skill-icon">{% if n.percent >= 100 %}✓{% else %}{{ loop.index }}{% endif %}</div><div class="skill-copy"><strong>{{ t('game.skill.' ~ n.id ~ '.title') }}</strong><small>{{ t('game.skill.' ~ n.id ~ '.description') }}</small><div class="progress"><i style="width:{{ n.percent }}%"></i></div><span>{{ n.value }}/{{ n.target }}</span></div></div>{% endfor %}</div>
+</section>
+
+<div class="game-columns">
+<section class="panel"><div class="panel-head"><div><span class="eyebrow">{{ t('game.achievements') }}</span><h2>{{ t('game.unlocked') }}</h2></div></div>
+<div class="badge-list">{% for a in game.achievements %}<article class="game-badge unlocked"><div class="badge-medal">{{ a.icon }}</div><div><strong>{{ t('game.achievement.' ~ a.codigo ~ '.title') }}</strong><p>{{ t('game.achievement.' ~ a.codigo ~ '.description') }}</p><small>+{{ a.xp }} XP · {{ a.desbloqueada_em[:10] }}</small></div></article>{% else %}<div class="empty-state">{{ t('game.no_badges') }}</div>{% endfor %}</div></section>
+<section class="panel"><div class="panel-head"><div><span class="eyebrow">{{ t('game.goals') }}</span><h2>{{ t('game.next_badges') }}</h2></div></div>
+<div class="badge-list">{% for a in game.locked %}<article class="game-badge locked"><div class="badge-medal">{{ a.icon }}</div><div><strong>{{ t('game.achievement.' ~ a.codigo ~ '.title') }}</strong><p>{{ t('game.achievement.' ~ a.codigo ~ '.description') }}</p><small>+{{ a.xp }} XP</small></div></article>{% endfor %}</div></section>
+</div>
+
+<section class="panel rewards-panel"><div class="panel-head"><div><span class="eyebrow">{{ t('game.rewards_eyebrow') }}</span><h2>{{ t('game.rewards_title') }}</h2></div><span class="panel-muted">{{ t('game.rewards_subtitle') }}</span></div>
+<div class="reward-grid">{% for r in game.rewards %}<article class="reward-card {% if r.unlocked %}reward-unlocked{% endif %}"><div class="reward-level">N{{ r.level }}</div><div><strong>{{ t('game.reward.' ~ r.level ~ '.title') }}</strong><small>{{ t('game.reward.' ~ r.level ~ '.description') }}</small></div>{% if r.unlocked %}<span class="reward-state">✓</span>{% else %}<span class="reward-state">{{ r.level }}→</span>{% endif %}</article>{% endfor %}</div></section>
+
+<section class="panel game-history"><div class="panel-head"><div><span class="eyebrow">{{ t('game.history') }}</span><h2>{{ t('game.recent') }}</h2></div></div>
+<div class="activity-list">{% for item in game.recent %}<div class="activity-row"><span class="activity-dot"></span><div><strong>{{ t('game.activity.' ~ item.tipo) }}</strong><small>{{ item.data }}</small></div><b>+{{ item.xp }} XP</b></div>{% else %}<div class="empty-state">{{ t('game.no_activity') }}</div>{% endfor %}</div></section>
+<p class="game-note">{{ t('game.note') }}</p>
+{% endblock %}

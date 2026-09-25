@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}{{ t('record.title') }}{% endblock %}
+{% block content %}
+<h2 class="page-title">📋 {{ t('record.title') }}</h2>
+
+<div class="section-card">
+  <h3 >{{ t('record.summary') }}</h3>
+  <form method="POST" action="{{ url_for('prontuario.atualizar') }}">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <label >{{ t('record.allergies') }}</label>
+    <input type="text" name="alergias" placeholder="{{ t('record.allergies_example') }}"
+           value="{{ usuario.alergias | join(', ') }}" />
+
+    <label >{{ t('record.chronic') }}</label>
+    <input type="text" name="doencas_cronicas" placeholder="{{ t('record.chronic_example') }}"
+           value="{{ usuario.doencas_cronicas | join(', ') }}" />
+
+    <label >{{ t('record.continuous') }}</label>
+    <input type="text" name="medicamentos_continuos" placeholder="{{ t('record.continuous_example') }}"
+           value="{{ usuario.medicamentos_continuos | join(', ') }}" />
+
+    <button type="submit" class="btn btn-primary" style="margin-top:.75rem" >{{ t('record.save') }}</button>
+  </form>
+</div>
+
+{% if usuario.alergias or usuario.doencas_cronicas %}
+<div class="section-card">
+  {% if usuario.alergias %}
+  <p><strong>⚠️ {{ t('record.allergies_label') }}</strong>
+    {% for a in usuario.alergias %}<span class="record-badge record-badge-danger">{{ a }}</span>{% endfor %}
+  </p>
+  {% endif %}
+  {% if usuario.doencas_cronicas %}
+  <p style="margin-top:.5rem"><strong>🩺 {{ t('record.chronic_label') }}</strong>
+    {% for d in usuario.doencas_cronicas %}<span class="record-badge">{{ d }}</span>{% endfor %}
+  </p>
+  {% endif %}
+  {% if usuario.medicamentos_continuos %}
+  <p style="margin-top:.5rem"><strong>💊 {{ t('record.continuous_label') }}</strong>
+    {% for m in usuario.medicamentos_continuos %}<span class="record-badge record-badge-success">{{ m }}</span>{% endfor %}
+  </p>
+  {% endif %}
+</div>
+{% endif %}
+
+<div class="section-card">
+  <h3 >{{ t('record.timeline') }}</h3>
+  {% if timeline %}
+  <div class="timeline">
+    {% for ev in timeline %}
+    <div class="timeline-item timeline-{{ ev.tipo }}">
+      <div class="timeline-date">{{ ev.data }}</div>
+      <div class="timeline-body">
+        <strong>{{ ev.titulo }}</strong>
+        <div class="timeline-detalhe">{{ ev.detalhe }}</div>
+        {% if ev.extra %}<div class="timeline-extra">{{ ev.extra }}</div>{% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="empty-state" >{{ t('record.empty') }}</p>
+  {% endif %}
+</div>
+
+<style>
+.record-badge { display:inline-flex; align-items:center; padding:4px 8px; margin:3px 4px 0 0; border-radius:5px; background:var(--surface-2); border:1px solid var(--line); color:var(--text); font-size:10px; font-weight:600; }
+.record-badge-danger { background:var(--danger-soft); color:var(--danger); border-color:transparent; }
+.record-badge-success { background:var(--success-soft); color:var(--success); border-color:transparent; }
+.timeline { position:relative; padding-left:1.5rem; }
+.timeline::before { content:''; position:absolute; left:5px; top:4px; bottom:4px;
+  width:2px; background:#e2e8f0; }
+.timeline-item { position:relative; padding-bottom:1.1rem; }
+.timeline-item::before { content:''; position:absolute; left:-1.5rem; top:4px;
+  width:10px; height:10px; border-radius:50%; background:var(--azul); }
+.timeline-consulta::before { background:var(--azul); }
+.timeline-exame::before { background:#8b5cf6; }
+.timeline-receita::before { background:#16a34a; }
+.timeline-date { font-size:.78rem; color:var(--cinza); font-weight:600; }
+.timeline-detalhe { font-size:.88rem; color:#475569; }
+.timeline-extra { font-size:.82rem; color:var(--cinza); font-style:italic; }
+
+</style>
+{% endblock %}

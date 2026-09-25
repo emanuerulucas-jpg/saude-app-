@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}{{ t('profile.edit_title') }}{% endblock %}
+{% block content %}
+<h2 class="page-title">{{ t('profile.edit_title') }}</h2>
+
+<div class="form-card profile-edit-card">
+  <form method="POST" enctype="multipart/form-data">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+
+    <div class="profile-photo-editor">
+      <div class="profile-photo-preview">
+        {% if usuario.foto_perfil %}
+          <img src="{{ url_for('perfil.foto_perfil') }}" alt="{{ t("profile.photo") }}">
+        {% else %}
+          <span>{{ (usuario.nome or usuario.login)[:1]|upper }}</span>
+        {% endif %}
+      </div>
+      <div>
+        <h3>{{ t("profile.photo") }}</h3>
+        <p>{{ t("profile.choose_photo") }}</p>
+        <input type="file" name="foto_perfil" accept="image/jpeg,image/png,image/webp">
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <div>
+        <label>{{ t("profile.name") }}</label>
+        <input type="text" name="nome" value="{{ usuario.nome }}" required />
+      </div>
+      <div>
+        <label>{{ t("profile.age") }}</label>
+        <input type="number" name="idade" value="{{ usuario.idade }}" required />
+      </div>
+      <div>
+        <label>{{ t("profile.height") }} (m)</label>
+        <input type="number" name="altura" step="0.01" value="{{ usuario.altura }}" required />
+      </div>
+      <div>
+        <label>{{ t("profile.weight") }} (kg)</label>
+        <input type="number" name="peso" step="0.1" value="{{ usuario.peso }}" required />
+      </div>
+      <div>
+        <label>{{ t("profile.blood") }}</label>
+        <select name="tipo_sanguineo">
+          {% for t in ["","A+","A-","B+","B-","AB+","AB-","O+","O-"] %}
+          <option value="{{ t }}" {{ 'selected' if t == usuario.tipo_sanguineo }}>{{ t or '—' }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label>{{ t("profile.water") }} (L)</label>
+        <input type="number" name="meta_agua" step="0.1" value="{{ usuario.meta_agua }}" />
+      </div>
+    </div>
+
+    <label>{{ t("profile.notes") }}</label>
+    <textarea name="observacoes" rows="3">{{ usuario.observacoes }}</textarea>
+
+    <button type="submit" class="btn btn-primary">{{ t("profile.save") }}</button>
+    <a href="{{ url_for('perfil.perfil') }}" class="btn btn-outline">{{ t("common.cancel") }}</a>
+  </form>
+</div>
+{% endblock %}

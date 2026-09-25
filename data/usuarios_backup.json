@@ -1,0 +1,66 @@
+{
+  "123": {
+    "login": "123",
+    "senha": "scrypt:32768:8:1$I21Q247cKRV53ARj$38b79dca03f1ea74db3b5c93bbd42169d36b8440bd00f29fc88e4aec0a7ed9dfd7246e888962c950f3d86d8dcea7e1927f75edc0b3d7fa175bfe621a619761b4",
+    "nome": "sla",
+    "idade": 21,
+    "altura": 1.7,
+    "peso": 70.0,
+    "tipo_sanguineo": "A+",
+    "observacoes": "",
+    "agua_consumida": 0.0,
+    "meta_agua": 2.0,
+    "historico_peso": [],
+    "historico_pressao": [],
+    "historico_glicemia": [],
+    "consultas": [],
+    "receitas": [],
+    "exames": [],
+    "agendamentos": [],
+    "alergias": [],
+    "doencas_cronicas": [],
+    "medicamentos_continuos": []
+  },
+  "Renjun": {
+    "login": "Renjun",
+    "senha": "scrypt:32768:8:1$pUVixCOb6B3X1Nsg$dcd6dffe1c6cd55dfa1577a7ebdeecc019b0a0acb6106f3bb310b3aff96e939ed1087b7f655bf136ec394e767f3160c86fb420d945feebbd3f37f516d373d99c",
+    "nome": "Andersson",
+    "idade": 25,
+    "altura": 1.71,
+    "peso": 55.0,
+    "tipo_sanguineo": "O-",
+    "observacoes": "",
+    "agua_consumida": 0.5,
+    "meta_agua": 2.0,
+    "historico_peso": [
+      {
+        "data": "2026-09-14",
+        "valor": 60.0
+      },
+      {
+        "data": "2026-09-14",
+        "valor": 55.0
+      }
+    ],
+    "historico_pressao": [
+      {
+        "data": "2026-09-14",
+        "sistolica": 233,
+        "diastolica": 123
+      }
+    ],
+    "historico_glicemia": [
+      {
+        "data": "2026-09-14",
+        "valor": 122.0
+      }
+    ],
+    "consultas": [],
+    "receitas": [],
+    "exames": [],
+    "agendamentos": [],
+    "alergias": [],
+    "doencas_cronicas": [],
+    "medicamentos_continuos": []
+  }
+}

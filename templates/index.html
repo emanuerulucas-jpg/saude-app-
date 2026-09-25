@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}{{ t('landing.title1') }} {{ t('landing.title2') }} — SaúdeApp{% endblock %}
+{% block content %}
+<section class="landing-page landing-v2">
+  <div class="landing-vignette"></div>
+  <div class="landing-topbar">
+    <a href="{{ url_for('auth.login') }}" class="landing-brand"><span class="landing-brand-mark">♥</span><span>SaúdeApp</span></a>
+    <span class="landing-status"><i></i> {{ t('landing.status') }}</span>
+    <a href="{{ url_for('auth.login') }}" class="landing-chat">{{ t('landing.login') }} <span>→</span></a>
+  </div>
+
+  <main class="landing-v2-main">
+    <div class="landing-v2-copy">
+      <span class="landing-v2-kicker">{{ t('landing.kicker') }}</span>
+      <h1>{{ t('landing.hero1') }}<br>{{ t('landing.hero2') }}<br><em class="hero-health-word">{{ t('landing.hero3') }}</em></h1>
+      <p>{{ t('landing.description') }}</p>
+      <div class="hero-buttons">
+        <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-large">{{ t('landing.login') }} <span>→</span></a>
+        <a href="{{ url_for('auth.cadastro') }}" class="btn btn-outline btn-large">{{ t('landing.register') }}</a>
+      </div>
+      <div class="landing-v2-note"><b>✓</b> {{ t('landing.note') }}</div>
+    </div>
+
+    <div class="pulse-stage" aria-label="{{ t('landing.heart_label') }}">
+      <div class="pulse-rings ring-a"></div><div class="pulse-rings ring-b"></div><div class="pulse-rings ring-c"></div>
+      <div class="pulse-orbit orbit-a"></div><div class="pulse-orbit orbit-b"></div>
+      <div class="pulse-orb orb-1"></div><div class="pulse-orb orb-2"></div><div class="pulse-orb orb-3"></div>
+      <div class="heart-pulse">
+        <div class="heart-aura"></div>
+        <svg class="giant-heart" viewBox="0 0 200 180" aria-hidden="true">
+          <defs><linearGradient id="heartGradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7fffe0"/><stop offset="45%" stop-color="#31d6a4"/><stop offset="100%" stop-color="#18aee8"/></linearGradient><filter id="heartGlow"><feGaussianBlur stdDeviation="7" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+          <path filter="url(#heartGlow)" fill="url(#heartGradient)" d="M100 166S18 119 18 62C18 33 37 16 61 16c18 0 31 10 39 25 8-15 21-25 39-25 24 0 43 17 43 46 0 57-82 104-82 104Z"/>
+        </svg>
+      </div>
+      <div class="heartbeat-panel">
+        <div class="heartbeat-head"><span><i></i> SAÚDEAPP</span><b>{{ t('landing.beat') }}</b></div>
+        <svg class="heartbeat-line" viewBox="0 0 600 100" preserveAspectRatio="none"><polyline points="0,58 105,58 135,58 154,58 171,18 190,84 208,58 270,58 320,58 343,58 360,40 372,68 384,58 445,58 482,58 502,12 523,88 541,58 600,58"/></svg>
+        <div class="heartbeat-foot"><span>{{ t('landing.continuous') }}</span><strong>♥</strong></div>
+      </div>
+      <div class="pulse-label label-top"><small>{{ t('landing.records') }}</small><b>{{ t('landing.organized') }}</b></div>
+      <div class="pulse-label label-bottom"><small>{{ t('landing.next') }}</small><b>{{ t('landing.allgood') }}</b></div>
+    </div>
+  </main>
+
+  <footer class="landing-v2-footer"><span>{{ t('landing.since') }}</span><span>{{ t('landing.pressure') }}</span><span>{{ t('landing.glucose') }}</span><span>{{ t('landing.weight') }}</span><span>{{ t('landing.history') }}</span></footer>
+</section>
+{% endblock %}

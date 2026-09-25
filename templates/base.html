@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="{{ idioma_atual }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="SaúdeApp — acompanhamento pessoal de saúde">
+  <title>{% block title %}SaúdeApp{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>(function(){if(localStorage.getItem('saudeapp-tema')==='dark')document.documentElement.classList.add('dark-theme')})();</script>
+  {% block head %}{% endblock %}
+</head>
+<body>
+{% if session.login %}
+<header class="app-shell">
+  <aside class="sidebar">
+    <a class="brand" href="{{ url_for('dashboard.dashboard') }}">
+      <span class="brand-mark" aria-hidden="true">+</span>
+      <span><strong>SaúdeApp</strong><small>{{ t('nav.workspace') }}</small></span>
+    </a>
+    <nav class="sidebar-nav" aria-label="{{ t('base.navigation') }}">
+      <span class="nav-caption"><strong>{{ t('nav.overview') }}</strong></span>
+      <a href="{{ url_for('dashboard.dashboard') }}" class="nav-item {{ 'active' if request.endpoint == 'dashboard.dashboard' else '' }}"><span>{{ t('nav.dashboard') }}</span></a>
+      <a href="{{ url_for('calendario.ver') }}" class="nav-item {{ 'active' if request.endpoint == 'calendario.ver' else '' }}"><span>{{ t('nav.calendar') }}</span></a>
+      <a href="{{ url_for('gamificacao.pagina') }}" class="nav-item {{ 'active' if request.endpoint == 'gamificacao.pagina' else '' }}"><span>{{ t('nav.gamification') }}</span>{% if gamificacao_atual %}<b class="nav-xp">{{ gamificacao_atual.xp }} XP</b>{% endif %}</a>
+      <a href="{{ url_for('notificacoes.listar') }}" class="nav-item {{ 'active' if request.endpoint and request.endpoint.startswith('notificacoes.') else '' }}"><span>{{ t('nav.notifications') }}</span>{% if notificacoes_nao_lidas %}<b class="nav-count">{{ notificacoes_nao_lidas }}</b>{% endif %}</a>
+      <span class="nav-caption"><strong>{{ t('nav.records') }}</strong></span>
+      <a href="{{ url_for('prontuario.ver') }}" class="nav-item {{ 'active' if request.endpoint == 'prontuario.ver' else '' }}"><span>{{ t('nav.prontuario') }}</span></a>
+      <a href="{{ url_for('consultas.listar') }}" class="nav-item {{ 'active' if request.endpoint == 'consultas.listar' else '' }}"><span>{{ t('nav.consultas') }}</span></a>
+      <a href="{{ url_for('receitas.listar') }}" class="nav-item {{ 'active' if request.endpoint == 'receitas.listar' else '' }}"><span>{{ t('nav.receitas') }}</span></a>
+      <a href="{{ url_for('exames.listar') }}" class="nav-item {{ 'active' if request.endpoint == 'exames.listar' else '' }}"><span>{{ t('nav.exames') }}</span></a>
+      <span class="nav-caption"><strong>{{ t('nav.system') }}</strong></span>
+      <a href="{{ url_for('ia.pagina') }}" class="nav-item {{ 'active' if request.endpoint and request.endpoint.startswith('ia.') else '' }}"><span>{{ t('nav.ai_short') }}</span></a>
+      <a href="{{ url_for('documentos.listar') }}" class="nav-item {{ 'active' if request.endpoint == 'documentos.listar' else '' }}"><span>{{ t('nav.documentos') }}</span></a>
+      <a href="{{ url_for('perfil.perfil') }}" class="nav-item {{ 'active' if request.endpoint == 'perfil.perfil' else '' }}"><span>{{ t('nav.perfil') }}</span></a>
+      <a href="{{ url_for('configuracoes.pagina') }}" class="nav-item {{ 'active' if request.endpoint and request.endpoint.startswith('configuracoes.') else '' }}"><span>{{ t('nav.settings') }}</span></a>
+    </nav>
+    <div class="sidebar-bottom">
+      <a class="user-mini" href="{{ url_for('perfil.perfil') }}">
+        <span class="avatar-mini">{% if usuario_atual and usuario_atual.foto_perfil %}<img src="{{ url_for('perfil.foto_perfil') }}" alt="{{ t('profile.photo') }}">{% else %}{{ (session.login or '?')[:1]|upper }}{% endif %}</span>
+        <span><strong>{{ session.login }}</strong><small>{{ t('nav.personal_account') }}</small></span>
+      </a>
+      <a class="logout-link" href="{{ url_for('auth.logout') }}">{{ t('nav.logout') }}</a>
+    </div>
+  </aside>
+  <div class="app-main">
+    <div class="topbar">
+      <div class="topbar-title">{% block topbar %}{{ t('nav.personal_area') }}{% endblock %}</div>
+      <div class="topbar-actions">
+        <a class="topbar-icon" href="{{ url_for('notificacoes.listar') }}" aria-label="{{ t('nav.notifications') }}">N{% if notificacoes_nao_lidas %}<i>{{ notificacoes_nao_lidas }}</i>{% endif %}</a>
+        <a class="topbar-user" href="{{ url_for('perfil.perfil') }}">{% if usuario_atual and usuario_atual.foto_perfil %}<img src="{{ url_for('perfil.foto_perfil') }}" alt="{{ t('profile.photo') }}">{% else %}{{ (session.login or '?')[:1]|upper }}{% endif %}</a>
+      </div>
+    </div>
+    <main class="container">
+{% else %}
+<main class="public-main">
+{% endif %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}<div class="flash-container">{% for category, message in messages %}<div class="alert alert-{{ category }}"><span>{{ message }}</span><button type="button" class="alert-close" onclick="this.parentElement.remove()">×</button></div>{% endfor %}</div>{% endif %}
+{% endwith %}
+
+{% block content %}{% endblock %}
+
+{% if session.login %}
+    </main>
+    <footer class="site-footer">SaúdeApp <span>•</span> {{ t('base.academic') }} <span>•</span> {{ t('base.local') }}</footer>
+  </div>
+{% else %}
+</main>
+{% endif %}
+
+<div class="utility-panel">
+  <form method="POST" action="{{ url_for('idioma.alterar') }}">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <label for="languageSelect">{{ t('lang.label') }}</label>
+    <select id="languageSelect" name="idioma" onchange="this.form.submit()">
+      {% for codigo, nome in idiomas.items() %}<option value="{{ codigo }}" {{ 'selected' if codigo == idioma_atual else '' }}>{{ nome }}</option>{% endfor %}
+    </select>
+  </form>
+  <div class="theme-pills"><button type="button" data-theme="light">{{ t('theme.light') }}</button><button type="button" data-theme="dark">{{ t('theme.dark') }}</button></div>
+</div>
+<script>
+(function(){
+  const root=document.documentElement;
+  document.querySelectorAll('[data-theme]').forEach(btn=>btn.addEventListener('click',()=>{
+    const theme=btn.dataset.theme; root.classList.toggle('dark-theme',theme==='dark'); localStorage.setItem('saudeapp-tema',theme);
+  }));
+})();
+</script>
+</body>
+</html>

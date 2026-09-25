@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}{{ t('profile.title') }}{% endblock %}
+{% block content %}
+<div class="profile-page-head page-head">
+  <div><span class="eyebrow">{{ t('profile.title') }}</span><h1>{{ usuario.nome or usuario.login }}</h1><p>@{{ usuario.login }}</p></div>
+  <a href="{{ url_for('perfil.editar_perfil') }}" class="btn btn-primary">{{ t('profile.edit') }} <span>→</span></a>
+</div>
+
+<div class="profile-layout">
+  <section class="profile-hero panel">
+    <div class="profile-identity">
+      <div class="profile-avatar profile-avatar-large">
+        {% if usuario.foto_perfil %}<img src="{{ url_for('perfil.foto_perfil') }}" alt="{{ t('profile.photo') }}">{% else %}<span>{{ (usuario.nome or usuario.login)[:1]|upper }}</span>{% endif %}
+      </div>
+      <div class="profile-identity-copy"><span class="profile-label">{{ t('profile.title') }}</span><h2>{{ usuario.nome or usuario.login }}</h2><p>@{{ usuario.login }}</p></div>
+    </div>
+    <div class="profile-summary">
+      <div><small>{{ t('profile.age') }}</small><strong>{{ usuario.idade }}</strong></div>
+      <div><small>{{ t('profile.weight') }}</small><strong>{{ usuario.peso }} kg</strong></div>
+      <div><small>{{ t('profile.bmi') }}</small><strong>{{ usuario.calcular_imc() }}</strong></div>
+    </div>
+  </section>
+
+  <section class="panel profile-details">
+    <div class="panel-head"><div><span class="eyebrow">{{ t('profile.title') }}</span><h2>{{ t('profile.edit') }}</h2></div></div>
+    <div class="profile-info-grid">
+      <div><span>{{ t('profile.name') }}</span><strong>{{ usuario.nome or '—' }}</strong></div>
+      <div><span>{{ t('profile.login') }}</span><strong>{{ usuario.login }}</strong></div>
+      <div><span>{{ t('profile.age') }}</span><strong>{{ usuario.idade }}</strong></div>
+      <div><span>{{ t('profile.blood') }}</span><strong>{{ usuario.tipo_sanguineo or '—' }}</strong></div>
+      <div><span>{{ t('profile.height') }}</span><strong>{{ usuario.altura }} m</strong></div>
+      <div><span>{{ t('profile.weight') }}</span><strong>{{ usuario.peso }} kg</strong></div>
+      <div><span>{{ t('profile.bmi') }}</span><strong>{{ usuario.calcular_imc() }} · {{ usuario.classificar_imc() }}</strong></div>
+      <div><span>{{ t('profile.water') }}</span><strong>{{ usuario.meta_agua }} L</strong></div>
+    </div>
+    <div class="profile-notes"><span>{{ t('profile.notes') }}</span><p>{{ usuario.observacoes or '—' }}</p></div>
+  </section>
+
+  <section class="panel profile-actions-panel">
+    <div><span class="eyebrow">SaúdeApp</span><h2>{{ t('profile.edit') }}</h2><p>{{ t('profile.choose_photo') }}</p></div>
+    <div class="profile-actions"><a href="{{ url_for('perfil.editar_perfil') }}" class="btn btn-primary">{{ t('profile.edit') }}</a><form method="POST" action="{{ url_for('perfil.deletar_conta') }}" onsubmit="return confirm('{{ t('profile.confirm_delete') if t('profile.confirm_delete') != 'profile.confirm_delete' else 'Tem certeza? Esta ação é irreversível.' }}')"><input type="hidden" name="_csrf" value="{{ csrf_token() }}"><button type="submit" class="btn btn-danger">{{ t('profile.delete') }}</button></form></div>
+  </section>
+</div>
+{% endblock %}

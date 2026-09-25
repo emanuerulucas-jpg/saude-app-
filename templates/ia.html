@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}{{ t('ai.title') }}{% endblock %}
+{% block content %}
+<div class="ai-page">
+  <div class="ai-header">
+    <div>
+      <span class="ai-kicker">{{ t('ai.brand') }}</span>
+      <h2 class="page-title">🤖 {{ t('ai.title') }}</h2>
+      <p class="page-subtitle">{{ t('ai.subtitle') }}</p>
+    </div>
+  </div>
+
+  <div class="ai-card">
+    <form method="POST" action="{{ url_for('ia.perguntar_ia') }}">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+      <label for="pergunta" >{{ t('ai.question') }}</label>
+      <textarea id="pergunta" name="pergunta" rows="4" maxlength="2000"
+                placeholder="{{ t('ai.placeholder') }}" required>{{ pergunta or '' }}</textarea>
+      <div class="ai-actions">
+        <button class="btn btn-primary" type="submit">🤖 {{ t('ai.send') }}</button>
+        <button class="btn btn-outline" type="button" onclick="document.getElementById('pergunta').value={{ t('ai.next_prompt')|tojson }}" >{{ t('ai.next') }}</button>
+        <button class="btn btn-outline" type="button" onclick="document.getElementById('pergunta').value={{ t('ai.summary_prompt')|tojson }}" >{{ t('ai.summary') }}</button>
+      </div>
+    </form>
+  </div>
+
+  {% if resposta %}
+  <div class="section-card ai-response {{ 'ai-ok' if resposta_ok else 'ai-error' }}">
+    <h3>{{ t('ai.response') if resposta_ok else t('ai.configuration') }}</h3>
+    <div class="ai-response-text">{{ resposta | e | replace('\n', '<br>') | safe }}</div>
+  </div>
+  {% endif %}
+
+  <div class="ai-info">
+    <strong>⚠️ {{ t('ai.important') }}</strong>
+    <p>{{ t('ai.disclaimer') }}</p>
+    <p>{{ t('ai.privacy') }}</p>
+  </div>
+</div>
+{% endblock %}

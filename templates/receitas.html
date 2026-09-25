@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}{{ t('prescriptions.title') }}{% endblock %}
+{% block content %}
+<h2 class="page-title">💊 {{ t('prescriptions.title') }}</h2>
+
+<div class="section-card">
+  <h3 >{{ t('prescriptions.new') }}</h3>
+  <form method="POST" action="{{ url_for('receitas.adicionar') }}" id="form-receita">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <div class="form-grid">
+      <div>
+        <label >{{ t('common.doctor') }}</label>
+        <input type="text" name="medico" required />
+      </div>
+      <div>
+        <label>{{ t('common.crm') }}</label>
+        <input type="text" name="crm" />
+      </div>
+    </div>
+
+    <div id="medicamentos">
+      <h4 style="margin:1rem 0 0.5rem" >{{ t('prescriptions.meds') }}</h4>
+      <div class="med-row">
+        <input type="text" name="med_nome" placeholder="{{ t('prescriptions.name_placeholder') }}" required />
+        <input type="text" name="med_dosagem" placeholder="{{ t('prescriptions.dose_placeholder') }}" />
+        <input type="text" name="med_frequencia" placeholder="{{ t('prescriptions.frequency_placeholder') }}" />
+        <input type="text" name="med_duracao" placeholder="{{ t('prescriptions.duration_placeholder') }}" />
+      </div>
+    </div>
+
+    <button type="button" class="btn btn-outline btn-sm" onclick="addMed()" >{{ t('prescriptions.add_med') }}</button>
+    <button type="submit" class="btn btn-primary" style="margin-left:0.5rem" >{{ t('prescriptions.save') }}</button>
+  </form>
+</div>
+
+{% if usuario.receitas %}
+<div class="section-card">
+  <h3 >{{ t('common.history') }}</h3>
+  {% for r in usuario.receitas | reverse %}
+  <div class="receita-card">
+    <div class="receita-header"><a class="btn btn-outline btn-sm float-right" target="_blank" href="{{ url_for('documentos.receita', receita_id=r.id) }}">📄 PDF</a>
+      <strong>{{ r.data }}</strong> — {{ t('prescriptions.doctor_prefix') }} {{ r.medico }}
+      {% if r.crm %}<span class="badge">CRM {{ r.crm }}</span>{% endif %}
+      <form method="POST" action="{{ url_for('receitas.remover', receita_id=r.id) }}" onsubmit="return confirm({{ t('prescriptions.remove_confirm')|tojson }})" style="display:inline">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}"><button type="submit" class="btn btn-danger btn-sm float-right">✕</button></form>
+    </div>
+    <table class="tabela tabela-sm">
+      <thead><tr><th>{{ t('prescriptions.name') }}</th><th>{{ t('prescriptions.dose') }}</th><th>{{ t('prescriptions.frequency') }}</th><th>{{ t('prescriptions.duration') }}</th></tr></thead>
+      <tbody>
+      {% for m in r.medicamentos %}
+        <tr><td>{{ m.nome }}</td><td>{{ m.dosagem }}</td>
+            <td>{{ m.frequencia }}</td><td>{{ m.duracao }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<p class="empty-state" >{{ t('prescriptions.empty') }}</p>
+{% endif %}
+
+<script>
+function addMed() {
+  const div = document.createElement("div");
+  div.className = "med-row";
+  div.innerHTML = `
+    <input type="text" name="med_nome" placeholder="{{ t('prescriptions.name_placeholder') }}" />
+    <input type="text" name="med_dosagem" placeholder="{{ t('prescriptions.dose_placeholder') }}" />
+    <input type="text" name="med_frequencia" placeholder="{{ t('prescriptions.frequency_placeholder') }}" />
+    <input type="text" name="med_duracao" placeholder="{{ t('prescriptions.duration_placeholder') }}" />
+    <button type="button" onclick="this.parentElement.remove()" class="btn btn-danger btn-sm">✕</button>
+  `;
+  document.getElementById("medicamentos").appendChild(div);
+}
+</script>
+{% endblock %}

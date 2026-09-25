@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block title %}{{ t('verify.title') }}{% endblock %}
+{% block content %}
+<div class="section-card verification"><div class="verify-icon">✓</div><h2 >{{ t('verify.found') }}</h2><p>{{ t('verify.token') }} <code>{{ documento.token }}</code></p><p>{{ t('verify.type') }} <b>{{ documento.tipo }}</b></p><p>{{ t('verify.issued') }} {{ documento.criado_em }}</p><div class="alert alert-warning">{{ t('verify.warning') }}</div></div>
+{% endblock %}

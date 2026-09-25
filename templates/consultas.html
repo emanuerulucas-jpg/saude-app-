@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}{{ t('consultations.title') }}{% endblock %}
+{% block content %}
+<h2 class="page-title">🏥 {{ t('consultations.title') }}</h2>
+
+<div class="section-card">
+  <h3>{{ t('consultations.new') }}</h3>
+  <form method="POST" action="{{ url_for('consultas.adicionar') }}">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <div class="form-grid">
+      <div>
+        <label>{{ t('common.doctor') }}</label>
+        <input type="text" name="medico" required />
+      </div>
+      <div>
+        <label>{{ t('common.crm') }}</label>
+        <input type="text" name="crm" />
+      </div>
+      <div>
+        <label>{{ t('common.specialty') }}</label>
+        <input type="text" name="especialidade" required />
+      </div>
+      <div>
+        <label>{{ t('common.date') }}</label>
+        <input type="date" name="data" />
+      </div>
+      <div>
+        <label>{{ t('common.diagnosis') }}</label>
+        <input type="text" name="diagnostico" />
+      </div>
+    </div>
+    <label>{{ t('common.notes') }}</label>
+    <textarea name="observacoes" rows="2"></textarea>
+    <button type="submit" class="btn btn-primary">{{ t('consultations.add') }}</button>
+  </form>
+</div>
+
+{% if usuario.consultas %}
+<div class="section-card">
+  <h3>{{ t('common.history') }}</h3>
+  <table class="tabela">
+    <thead>
+      <tr>
+        <th>{{ t('common.date') }}</th><th>{{ t('common.doctor') }}</th><th>{{ t('common.specialty') }}</th>
+        <th>{{ t('common.diagnosis') }}</th><th>{{ t('common.notes') }}</th><th></th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for c in usuario.consultas | reverse %}
+      <tr>
+        <td>{{ c.data }}</td>
+        <td>{{ t('common.doctor_prefix') }} {{ c.medico }}<br><small>CRM {{ c.crm }}</small></td>
+        <td>{{ c.especialidade }}</td>
+        <td>{{ c.diagnostico or '—' }}</td>
+        <td>{{ c.observacoes or '—' }}</td>
+        <td><form method="POST" action="{{ url_for('consultas.remover', consulta_id=c.id) }}" onsubmit="return confirm('{{ t('common.remove_confirm') }}')">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}"><button class="btn btn-danger btn-sm">✕</button></form></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p class="empty-state" >{{ t('consultations.empty') }}</p>
+{% endif %}
+{% endblock %}
